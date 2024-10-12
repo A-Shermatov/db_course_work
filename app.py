@@ -32,7 +32,7 @@ def create_user() -> jsonify:
             'username' not in data or \
             'password' not in data or \
             'role' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     if 'name' in data:
         if 'surname' in data:
             answer = create_user_func(_name=data['name'], _surname=data['surname'], _username=data['username'],
@@ -43,9 +43,10 @@ def create_user() -> jsonify:
     else:
         answer = create_user_func(_username=data['username'], _email=data['email'],
                                   _password=data['password'], _role=data['role'])
+    print(answer)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK', 'user_id': answer[1]}), 200
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'Created', 'user_id': answer[1]}), 201
 
 
 @app.route("/users/login/", methods=['POST'])
@@ -56,10 +57,10 @@ def login_user() -> jsonify:
             'role' not in data or \
             'username' in data and len(data['username']) > 15 \
             or 'role' in data and len(data['role']) > 10:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = login_user_func(_username=data['username'], _password=data['password'], _role=data['role'])
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     return jsonify({'status': 'OK', 'user_id': answer[1]}), 200
 
 
@@ -67,11 +68,11 @@ def login_user() -> jsonify:
 def update_user() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if not check(data):
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = update_user_func(data=data)
     if answer[0] == "Failed":
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK', 'user_id': data['user_id']}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'Accepted', 'user_id': data['user_id']}), 202
 
 
 @app.route("/users/", methods=['GET'])
@@ -89,18 +90,18 @@ def search_user() -> jsonify:
     if 'user_id' not in data:
         return jsonify({'status': 'Failed'}), 400
     answer = search_user_func(data)
-    return jsonify({'status': 'OK', 'user_id': user_id, 'users': answer[1]}), 202
+    return jsonify({'status': 'OK', 'user_id': user_id, 'users': answer[1]}), 200
 
 
 @app.route("/users/", methods=['DELETE'])
 def delete_user() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'delete_user_id' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = delete_user_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK'}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'OK'}), 200
 
 
 # SUBJECTS=================================================================================
@@ -110,11 +111,11 @@ def delete_user() -> jsonify:
 def create_subject() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'title' not in data or 'title' in data and len(data['title']) > 20:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = create_subject_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'subject_id': answer[1]}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'Created', 'user_id': data['user_id'], 'subject_id': answer[1]}), 201
 
 
 @app.route("/subjects/", methods=['PUT'])
@@ -122,11 +123,11 @@ def update_subject() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'subject_id' not in data or \
             'title' not in data or 'title' in data and len(data['title']) > 20:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = update_subject_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'subject_id': data['subject_id']}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'subject_id': data['subject_id']}), 200
 
 
 @app.route("/subjects/", methods=['GET'])
@@ -137,24 +138,24 @@ def search_subject() -> jsonify:
     }
     data = {key: val for key, val in data.items() if val}
     if 'user_id' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
 
     answer = search_subject_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
 
-    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'subjects': answer[1]}), 202
+    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'subjects': answer[1]}), 200
 
 
 @app.route("/subjects/", methods=['DELETE'])
 def delete_subject() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'delete_subject_id' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = delete_subject_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK'}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'OK'}), 200
 
 
 # THEMES=================================================================================
@@ -165,11 +166,11 @@ def create_theme() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'subject_id' not in data or 'title' not in data or \
             'title' in data and len(data['title']) > 20:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = create_theme_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK', 'user_id': data['user_id'],
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'Created', 'user_id': data['user_id'],
                     'subject_id': data['subject_id'], 'theme_id': answer[1]}), 201
 
 
@@ -178,12 +179,12 @@ def update_theme() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'subject_id' not in data or \
             'theme_id' not in data or 'title' in data and len(data['title']) > 20:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = update_theme_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     return jsonify({'status': 'OK', 'user_id': data['user_id'],
-                    'subject_id': data['subject_id'], 'theme_id': data['theme_id']}), 201
+                    'subject_id': data['subject_id'], 'theme_id': data['theme_id']}), 200
 
 
 @app.route("/themes/", methods=['GET'])
@@ -194,24 +195,24 @@ def search_theme() -> jsonify:
     }
     data = {key: val for key, val in data.items() if val}
     if 'user_id' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
 
     answer = search_theme_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
 
-    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'themes': answer[1]}), 202
+    return jsonify({'status': 'OK', 'user_id': data['user_id'], 'themes': answer[1]}), 200
 
 
 @app.route("/themes/", methods=['DELETE'])
 def delete_theme() -> jsonify:
     data = {key: val for key, val in request.get_json().items() if val != ''}
     if 'user_id' not in data or 'subject_id' not in data or 'delete_theme_id' not in data:
-        return jsonify({'status': 'Failed'}), 400
+        return jsonify({'status': 'Bad Request'}), 400
     answer = delete_theme_func(data)
     if answer[0] == 'Failed':
-        return jsonify({'status': 'Failed'}), 400
-    return jsonify({'status': 'OK'}), 201
+        return jsonify({'status': 'Bad Request'}), 400
+    return jsonify({'status': 'OK'}), 200
 
 
 # Functions=======================================================================================
@@ -246,7 +247,6 @@ def search(data, query):
                 values.append(v)
         if len(data.keys()) > 0:
             query = query[:-4]
-    print(query)
     connect = mysql.connect
     cursor = connect.cursor()
     cursor.execute(
@@ -372,7 +372,7 @@ def delete_user_func(data):
         "SELECT role FROM users WHERE id = %s", (data['user_id'],)
     )
     user = cursor.fetchone()
-    if user[0] != 'admin':
+    if user is None or user[0] != 'admin':
         return ['Failed']
     cursor.execute(
         "delete from users where id = %s;", (data['delete_user_id'],)
@@ -560,7 +560,7 @@ def delete_theme_func(data):
     if subject_id is None or subject_id[0] != data['subject_id']:
         return ['Failed']
     cursor.execute(
-        "delete from theme where id = %s;", (data['delete_theme_id'],)
+        "delete from themes where id = %s;", (data['delete_theme_id'],)
     )
     connect.commit()
     cursor.close()
